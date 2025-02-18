@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirana Price Comparison</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Kirana Price Comparison</h1>
+        <label for="location">Select Your Village/City:</label>
+        <select id="location">
+            <option value="">Select Location</option>
+            <option value="Village A">Village A</option>
+            <option value="Village B">Village B</option>
+            <option value="City X">City X</option>
+            <option value="City Y">City Y</option>
+        </select>
+
+        <input type="text" id="search" placeholder="Search for a product...">
+        
+        <table id="results">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Shop Name</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Search results will be shown here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
