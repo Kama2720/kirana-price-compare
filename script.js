@@ -46,3 +46,16 @@ function updateResults() {
         document.body.style.backgroundColor = "#FF7F7F"; // Light Red when no match
     }
 }
+document.getElementById("searchBox").addEventListener("keyup", function() {
+    let searchText = this.value.toLowerCase();
+    let products = document.querySelectorAll(".product");
+
+    products.forEach(function(product) {
+        let text = product.textContent.toLowerCase();
+        if (text.includes(searchText)) {
+            product.style.display = "block";
+        } else {
+            product.style.display = "none";
+        }
+    });
+});
