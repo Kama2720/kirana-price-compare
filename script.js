@@ -1,3 +1,6 @@
+window.onload = function() {
+    displayProducts(productsData);
+};
 body {
     font-family: Arial, sans-serif;
     background-color: #ADD8E6; /* Default Light Blue */
