@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
-    loadProducts(); // Load products on page load
-
+    loadProducts();
     document.getElementById("searchBox").addEventListener("keyup", searchProduct);
     document.getElementById("areaSelect").addEventListener("change", filterByArea);
-    document.getElementById("updateForm").addEventListener("submit", addProduct);
+    document.getElementById("updateForm").addEventListener("submit", addOrUpdateProduct);
 
     document.getElementById("adminLogin").addEventListener("click", adminLogin);
     document.getElementById("adminLogout").addEventListener("click", adminLogout);
@@ -11,18 +10,14 @@ document.addEventListener("DOMContentLoaded", function () {
     checkAdminStatus();
 });
 
-// Load Products from Local Storage
+// ✅ Load Products from Local Storage
 function loadProducts() {
     let storedProducts = localStorage.getItem("products");
-    if (storedProducts) {
-        productsData = JSON.parse(storedProducts);
-    } else {
-        productsData = [];
-    }
+    productsData = storedProducts ? JSON.parse(storedProducts) : [];
     displayProducts(productsData);
 }
 
-// Check Admin Login Status
+// ✅ Check Admin Login Status
 function checkAdminStatus() {
     if (localStorage.getItem("isAdmin") === "true") {
         document.getElementById("updateSection").style.display = "block";
@@ -34,7 +29,7 @@ function checkAdminStatus() {
     }
 }
 
-// Admin Login Function
+// ✅ Admin Login Function
 function adminLogin() {
     let username = prompt("Enter Admin Username:");
     let password = prompt("Enter Admin Password:");
@@ -48,15 +43,15 @@ function adminLogin() {
     }
 }
 
-// Admin Logout Function
+// ✅ Admin Logout Function
 function adminLogout() {
     localStorage.removeItem("isAdmin");
     checkAdminStatus();
     alert("🚪 Logged Out Successfully!");
 }
 
-// ✅ Add or Update Product Prices (Admin Only)
-function addProduct(event) {
+// ✅ Add or Update Only One Supplier's Price Without Affecting Others
+function addOrUpdateProduct(event) {
     event.preventDefault();
 
     if (localStorage.getItem("isAdmin") !== "true") {
@@ -75,6 +70,7 @@ function addProduct(event) {
         return;
     }
 
+    // ✅ Find if the product already exists for the same supplier & area
     let existingProductIndex = productsData.findIndex(
         (p) => p.name.toLowerCase() === name.toLowerCase() &&
                p.supplier.toLowerCase() === supplier.toLowerCase() &&
@@ -82,11 +78,11 @@ function addProduct(event) {
     );
 
     if (existingProductIndex !== -1) {
-        // Update existing entry
+        // ✅ Update the price of this supplier only (Does NOT overwrite others)
         productsData[existingProductIndex].price = price;
         productsData[existingProductIndex].lastUpdated = lastUpdated;
     } else {
-        // Add new entry
+        // ✅ Add a new product entry for this supplier & area
         productsData.push({ name, price, supplier, area, lastUpdated });
     }
 
@@ -96,7 +92,7 @@ function addProduct(event) {
     alert("✅ Price Updated Successfully!");
 }
 
-// ✅ Display Products with Multiple Suppliers
+// ✅ Display Products with Multiple Suppliers & Areas (Keep Comparison Feature)
 function displayProducts(products) {
     let productList = document.getElementById("productList");
     productList.innerHTML = "";
@@ -139,7 +135,6 @@ function displayProducts(products) {
 // ✅ Search Product and Change Background Color
 function searchProduct() {
     let searchValue = document.getElementById("searchBox").value.toLowerCase();
-    let productList = document.getElementById("productList");
     let filteredProducts = productsData.filter((product) => product.name.toLowerCase().includes(searchValue));
 
     if (searchValue === "") {
