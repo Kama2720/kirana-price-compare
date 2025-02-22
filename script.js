@@ -1,61 +1,80 @@
-const productData = {
-    "Village A": [
-        { name: "Sugar", price: 40, shop: "Kirana Mart A", lastUpdated: "2025-02-10" },
-        { name: "Rice", price: 50, shop: "Fresh Grocery A", lastUpdated: "2025-02-09" }
-    ],
-    "Village B": [
-        { name: "Sugar", price: 42, shop: "Daily Needs B", lastUpdated: "2025-02-11" },
-        { name: "Wheat", price: 30, shop: "SuperMart B", lastUpdated: "2025-02-08" }
-    ],
-    "City X": [
-        { name: "Sugar", price: 39, shop: "Mega Store X", lastUpdated: "2025-02-07" },
-        { name: "Salt", price: 10, shop: "Quick Buy X", lastUpdated: "2025-02-06" }
-    ]
-};
-
-document.getElementById("search").addEventListener("input", updateResults);
-document.getElementById("location").addEventListener("change", updateResults);
-
-function updateResults() {
-    const location = document.getElementById("location").value;
-    const searchQuery = document.getElementById("search").value.toLowerCase();
-    const resultsTable = document.getElementById("results").getElementsByTagName("tbody")[0];
-
-    resultsTable.innerHTML = "";
-
-    if (!location) {
-        document.body.style.backgroundColor = "#ADD8E6"; // Default blue
-        return;
-    }
-
-    let filteredData = productData[location] ? productData[location].filter(item => 
-        item.name.toLowerCase().includes(searchQuery)
-    ) : [];
-
-    if (filteredData.length > 0) {
-        filteredData.sort((a, b) => a.price - b.price); // Sort by price (low to high)
-        document.body.style.backgroundColor = "#90EE90"; // Light Green when match found
-        filteredData.forEach(item => {
-            let row = resultsTable.insertRow();
-            row.insertCell(0).textContent = item.name;
-            row.insertCell(1).textContent = `₹${item.price}`;
-            row.insertCell(2).textContent = item.shop;
-            row.insertCell(3).textContent = item.lastUpdated;
-        });
-    } else {
-        document.body.style.backgroundColor = "#FF7F7F"; // Light Red when no match
-    }
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ADD8E6; /* Default Light Blue */
+    text-align: center;
+    transition: background-color 0.3s ease-in-out;
 }
-document.getElementById("searchBox").addEventListener("keyup", function() {
-    let searchText = this.value.toLowerCase();
-    let products = document.querySelectorAll(".product");
 
-    products.forEach(function(product) {
-        let text = product.textContent.toLowerCase();
-        if (text.includes(searchText)) {
-            product.style.display = "block";
-        } else {
-            product.style.display = "none";
-        }
-    });
-});
+.container {
+    width: 80%;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+input, select {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.product {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.product:hover {
+    background: #e3e3e3;
+    cursor: pointer;
+}
+
+.product-details {
+    text-align: left;
+}
+
+.product-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.product-supplier {
+    font-size: 14px;
+    color: gray;
+}
+
+.product-price {
+    font-weight: bold;
+    color: green;
+}
+
+.product-update {
+    font-size: 12px;
+    color: darkgray;
+}
+
+#suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    width: 90%;
+    margin-left: 5%;
+    max-height: 150px;
+    overflow-y: auto;
+    display: none;
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background: #f0f0f0;
+}
