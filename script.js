@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    loadProducts(); // Load products when page loads
+    loadProducts(); // Load products on page load
 
     document.getElementById("searchBox").addEventListener("keyup", searchProduct);
     document.getElementById("areaSelect").addEventListener("change", filterByArea);
@@ -55,7 +55,7 @@ function adminLogout() {
     alert("🚪 Logged Out Successfully!");
 }
 
-// ✅ Updated Function to Add/Update Product Prices
+// ✅ Add or Update Product Prices (Admin Only)
 function addProduct(event) {
     event.preventDefault();
 
@@ -93,7 +93,7 @@ function addProduct(event) {
     alert("✅ Price Updated Successfully!");
 }
 
-// ✅ Updated Function to Display Products with "Last Updated" Info
+// ✅ Display Products with "Last Updated" Info
 function displayProducts(products) {
     let productList = document.getElementById("productList");
     productList.innerHTML = "";
@@ -111,4 +111,31 @@ function displayProducts(products) {
         `;
         productList.appendChild(productItem);
     });
+}
+
+// ✅ Search Product and Change Background Color
+function searchProduct() {
+    let searchValue = document.getElementById("searchBox").value.toLowerCase();
+    let productList = document.getElementById("productList");
+    let products = productsData.filter((product) => product.name.toLowerCase().includes(searchValue));
+
+    if (searchValue === "") {
+        document.body.style.backgroundColor = "#ADD8E6"; // Default ocean light blue
+    } else if (products.length > 0) {
+        document.body.style.backgroundColor = "#90EE90"; // Light green for match found
+    } else {
+        document.body.style.backgroundColor = "#FF7F7F"; // Light red for no match
+    }
+
+    displayProducts(products);
+}
+
+// ✅ Filter Products by Selected Area
+function filterByArea() {
+    let selectedArea = document.getElementById("areaSelect").value.toLowerCase();
+    let filteredProducts = selectedArea === "all"
+        ? productsData
+        : productsData.filter((product) => product.area.toLowerCase() === selectedArea);
+
+    displayProducts(filteredProducts);
 }
