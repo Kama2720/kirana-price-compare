@@ -34,3 +34,16 @@
     <script src="script.js"></script>
 </body>
 </html>
+<button id="adminLogin">🔑 Admin Login</button>
+<button id="adminLogout" style="display: none;">🚪 Logout</button>
+
+<div id="updateSection" style="display: none;">
+    <h3>Update Product Rates</h3>
+    <form id="updateForm">
+        <input type="text" id="productName" placeholder="Product Name" required>
+        <input type="number" id="productPrice" placeholder="Price (₹)" required>
+        <input type="text" id="supplierName" placeholder="Supplier Name" required>
+        <input type="text" id="productCity" placeholder="City" required>
+        <button type="submit">Update Rate</button>
+    </form>
+</div>
