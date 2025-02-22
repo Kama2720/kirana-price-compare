@@ -1,24 +1,70 @@
-// Product data with last update timestamps
-let productsData = [
+// Pre-set Admin Credentials (Change these later)
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "1234";
+
+window.onload = function () {
+    loadProducts(); // Load products from localStorage
+
+    document.getElementById("searchBox").addEventListener("keyup", searchProduct);
+    document.getElementById("areaSelect").addEventListener("change", filterByArea);
+    document.getElementById("updateForm").addEventListener("submit", addProduct);
+
+    // Admin Login
+    document.getElementById("adminLogin").addEventListener("click", adminLogin);
+    document.getElementById("adminLogout").addEventListener("click", adminLogout);
+
+    checkAdminStatus();
+};
+
+// **Check if Admin is Logged In**
+function checkAdminStatus() {
+    if (localStorage.getItem("isAdmin") === "true") {
+        document.getElementById("updateSection").style.display = "block";
+        document.getElementById("adminLogin").style.display = "none";
+        document.getElementById("adminLogout").style.display = "inline-block";
+    } else {
+        document.getElementById("updateSection").style.display = "none";
+    }
+}
+
+// **Admin Login Function**
+function adminLogin() {
+    let username = prompt("Enter Admin Username:");
+    let password = prompt("Enter Admin Password:");
+
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        alert("Admin Login Successful ✅");
+        localStorage.setItem("isAdmin", "true");
+        checkAdminStatus();
+    } else {
+        alert("❌ Incorrect Credentials!");
+    }
+}
+
+// **Admin Logout Function**
+function adminLogout() {
+    localStorage.removeItem("isAdmin");
+    checkAdminStatus();
+    alert("Logged Out!");
+}
+
+// **Load Products from Local Storage**
+let productsData = JSON.parse(localStorage.getItem("products")) || [
     { "name": "Sugar (1kg)", "price": 40, "supplier": "ABC Wholesaler", "area": "Mumbai", "lastUpdated": "2025-02-21 10:00 AM" },
     { "name": "Wheat Flour (5kg)", "price": 250, "supplier": "XYZ Traders", "area": "Delhi", "lastUpdated": "2025-02-21 09:30 AM" },
-    { "name": "Rice (1kg)", "price": 55, "supplier": "Good Quality Stores", "area": "Bangalore", "lastUpdated": "2025-02-20 06:00 PM" },
-    { "name": "Salt (1kg)", "price": 20, "supplier": "Fresh Groceries", "area": "Mumbai", "lastUpdated": "2025-02-20 04:45 PM" },
-    { "name": "Cooking Oil (1L)", "price": 150, "supplier": "ABC Wholesaler", "area": "Delhi", "lastUpdated": "2025-02-19 02:15 PM" },
-    { "name": "Sanchi Ghee (1L)", "price": 580, "supplier": "ABC Wholesaler", "area": "khokra", "lastUpdated": "2025-02-22 08:03 PM" },
-    { "name": "Dal (1kg)", "price": 90, "supplier": "Organic Farms", "area": "Bangalore", "lastUpdated": "2025-02-18 11:30 AM" }
+    { "name": "Rice (1kg)", "price": 55, "supplier": "Good Quality Stores", "area": "Bangalore", "lastUpdated": "2025-02-20 06:00 PM" }
 ];
 
-// Display products on page load
-document.addEventListener("DOMContentLoaded", function () {
+function loadProducts() {
     displayProducts(productsData);
-});
+}
 
+// **Function to Display Products**
 function displayProducts(products) {
     let productList = document.getElementById("productList");
     productList.innerHTML = "";
 
-    products.forEach(product => {
+    products.forEach((product, index) => {
         let productItem = document.createElement("div");
         productItem.classList.add("product");
         productItem.innerHTML = `
@@ -31,52 +77,57 @@ function displayProducts(products) {
         `;
         productList.appendChild(productItem);
     });
+
+    localStorage.setItem("products", JSON.stringify(products));
 }
 
-// Search with Auto-Suggestions & Background Color Change
+// **Function to Add or Update a Product (Admin Only)**
+function addProduct(event) {
+    event.preventDefault();
+
+    if (localStorage.getItem("isAdmin") !== "true") {
+        alert("❌ Only Admin Can Update Prices!");
+        return;
+    }
+
+    let name = document.getElementById("productName").value;
+    let price = parseFloat(document.getElementById("productPrice").value);
+    let supplier = document.getElementById("supplierName").value;
+    let area = document.getElementById("productCity").value;
+    let lastUpdated = new Date().toLocaleString();
+
+    let existingProduct = productsData.find(p => p.name.toLowerCase() === name.toLowerCase() && p.area.toLowerCase() === area.toLowerCase());
+
+    if (existingProduct) {
+        existingProduct.price = price;
+        existingProduct.supplier = supplier;
+        existingProduct.lastUpdated = lastUpdated;
+    } else {
+        productsData.push({ name, price, supplier, area, lastUpdated });
+    }
+
+    displayProducts(productsData);
+    document.getElementById("updateForm").reset();
+}
+
+// **Function to Search Products by Name & Selected Area**
 function searchProduct() {
     let searchValue = document.getElementById("searchBox").value.toLowerCase();
-    let suggestionsDiv = document.getElementById("suggestions");
-    let matchingProducts = productsData.filter(product =>
-        product.name.toLowerCase().includes(searchValue)
+    let selectedArea = document.getElementById("areaSelect").value;
+
+    let filteredProducts = productsData.filter(product =>
+        product.name.toLowerCase().includes(searchValue) &&
+        (selectedArea === "all" || product.area === selectedArea)
     );
 
-    // Change background color
-    let body = document.getElementById("body");
-    if (searchValue === "") {
-        body.style.backgroundColor = "#ADD8E6"; // Default Light Blue
-    } else if (matchingProducts.length > 0) {
-        body.style.backgroundColor = "#90EE90"; // Light Green (Match Found)
-    } else {
-        body.style.backgroundColor = "#FF7F7F"; // Light Red (No Match)
-    }
-
-    // Display Auto-Suggestions
-    if (searchValue === "" || matchingProducts.length === 0) {
-        suggestionsDiv.style.display = "none";
-    } else {
-        suggestionsDiv.innerHTML = "";
-        matchingProducts.forEach(product => {
-            let suggestionItem = document.createElement("div");
-            suggestionItem.classList.add("suggestion-item");
-            suggestionItem.textContent = product.name;
-            suggestionItem.onclick = function () {
-                document.getElementById("searchBox").value = product.name;
-                displayProducts([product]); // Show only selected product
-                suggestionsDiv.style.display = "none";
-            };
-            suggestionsDiv.appendChild(suggestionItem);
-        });
-        suggestionsDiv.style.display = "block";
-    }
+    displayProducts(filteredProducts);
 }
 
-// Filter by Area
+// **Function to Filter Products by Area**
 function filterByArea() {
     let selectedArea = document.getElementById("areaSelect").value;
     let filteredProducts = selectedArea === "all"
         ? productsData
         : productsData.filter(product => product.area === selectedArea);
-
     displayProducts(filteredProducts);
 }
