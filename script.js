@@ -75,15 +75,18 @@ function addProduct(event) {
         return;
     }
 
-    let existingProduct = productsData.find(
-        (p) => p.name.toLowerCase() === name.toLowerCase() && p.area.toLowerCase() === area.toLowerCase()
+    let existingProductIndex = productsData.findIndex(
+        (p) => p.name.toLowerCase() === name.toLowerCase() &&
+               p.supplier.toLowerCase() === supplier.toLowerCase() &&
+               p.area.toLowerCase() === area.toLowerCase()
     );
 
-    if (existingProduct) {
-        existingProduct.price = price;
-        existingProduct.supplier = supplier;
-        existingProduct.lastUpdated = lastUpdated;
+    if (existingProductIndex !== -1) {
+        // Update existing entry
+        productsData[existingProductIndex].price = price;
+        productsData[existingProductIndex].lastUpdated = lastUpdated;
     } else {
+        // Add new entry
         productsData.push({ name, price, supplier, area, lastUpdated });
     }
 
@@ -93,41 +96,61 @@ function addProduct(event) {
     alert("✅ Price Updated Successfully!");
 }
 
-// ✅ Display Products with "Last Updated" Info
+// ✅ Display Products with Multiple Suppliers
 function displayProducts(products) {
     let productList = document.getElementById("productList");
     productList.innerHTML = "";
 
+    let groupedProducts = {};
+
+    // Group products by name
     products.forEach((product) => {
+        let productKey = product.name.toLowerCase();
+        if (!groupedProducts[productKey]) {
+            groupedProducts[productKey] = [];
+        }
+        groupedProducts[productKey].push(product);
+    });
+
+    for (let productName in groupedProducts) {
+        let suppliersList = groupedProducts[productName]
+            .sort((a, b) => a.price - b.price) // Sort by price (Lowest First)
+            .map((product) =>
+                `<div class="supplier">
+                    <span class="product-supplier">Supplier: ${product.supplier} (${product.area})</span> |
+                    <span class="product-price">₹${product.price}</span> |
+                    <span class="product-update">Last Updated: ${product.lastUpdated}</span>
+                </div>`
+            )
+            .join("");
+
         let productItem = document.createElement("div");
         productItem.classList.add("product");
         productItem.innerHTML = `
-            <div class="product-details">
-                <span class="product-name">${product.name}</span><br>
-                <span class="product-supplier">Supplier: ${product.supplier} (${product.area})</span><br>
-                <span class="product-update">Last Updated: ${product.lastUpdated}</span>
+            <div class="product-title">
+                <h3>${productName}</h3>
             </div>
-            <span class="product-price">₹${product.price}</span>
+            ${suppliersList}
         `;
         productList.appendChild(productItem);
-    });
+    }
 }
 
 // ✅ Search Product and Change Background Color
 function searchProduct() {
     let searchValue = document.getElementById("searchBox").value.toLowerCase();
     let productList = document.getElementById("productList");
-    let products = productsData.filter((product) => product.name.toLowerCase().includes(searchValue));
+    let filteredProducts = productsData.filter((product) => product.name.toLowerCase().includes(searchValue));
 
     if (searchValue === "") {
         document.body.style.backgroundColor = "#ADD8E6"; // Default ocean light blue
-    } else if (products.length > 0) {
+    } else if (filteredProducts.length > 0) {
         document.body.style.backgroundColor = "#90EE90"; // Light green for match found
     } else {
         document.body.style.backgroundColor = "#FF7F7F"; // Light red for no match
     }
 
-    displayProducts(products);
+    displayProducts(filteredProducts);
 }
 
 // ✅ Filter Products by Selected Area
