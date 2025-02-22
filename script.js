@@ -5,7 +5,7 @@ let productsData = [
     { "name": "Rice (1kg)", "price": 55, "supplier": "Good Quality Stores", "area": "Bangalore", "lastUpdated": "2025-02-20 06:00 PM" },
     { "name": "Salt (1kg)", "price": 20, "supplier": "Fresh Groceries", "area": "Mumbai", "lastUpdated": "2025-02-20 04:45 PM" },
     { "name": "Cooking Oil (1L)", "price": 150, "supplier": "ABC Wholesaler", "area": "Delhi", "lastUpdated": "2025-02-19 02:15 PM" },
-    { "name": "Sanchi Ghee (1L)", "price": 580, "supplier": "jain genral store", "area": "khokra", "lastUpdated": "2025-02-22 08:03 PM" },
+    { "name": "Sanchi Ghee (1L)", "price": 580, "supplier": "ABC Wholesaler", "area": "khokra", "lastUpdated": "2025-02-22 08:03 PM" },
     { "name": "Dal (1kg)", "price": 90, "supplier": "Organic Farms", "area": "Bangalore", "lastUpdated": "2025-02-18 11:30 AM" }
 ];
 
