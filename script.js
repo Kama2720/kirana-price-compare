@@ -50,7 +50,7 @@ function adminLogout() {
     alert("🚪 Logged Out Successfully!");
 }
 
-// ✅ Add or Update Only One Supplier's Price Without Affecting Others
+// ✅ Add or Update Price for a Specific Supplier & Product
 function addOrUpdateProduct(event) {
     event.preventDefault();
 
@@ -70,7 +70,7 @@ function addOrUpdateProduct(event) {
         return;
     }
 
-    // ✅ Find if the product already exists for the same supplier & area
+    // ✅ Check if the same supplier is already selling this product in the same area
     let existingProductIndex = productsData.findIndex(
         (p) => p.name.toLowerCase() === name.toLowerCase() &&
                p.supplier.toLowerCase() === supplier.toLowerCase() &&
@@ -78,11 +78,11 @@ function addOrUpdateProduct(event) {
     );
 
     if (existingProductIndex !== -1) {
-        // ✅ Update the price of this supplier only (Does NOT overwrite others)
+        // ✅ Update this supplier's price without affecting other suppliers
         productsData[existingProductIndex].price = price;
         productsData[existingProductIndex].lastUpdated = lastUpdated;
     } else {
-        // ✅ Add a new product entry for this supplier & area
+        // ✅ Add a new entry if the supplier is new
         productsData.push({ name, price, supplier, area, lastUpdated });
     }
 
@@ -92,7 +92,7 @@ function addOrUpdateProduct(event) {
     alert("✅ Price Updated Successfully!");
 }
 
-// ✅ Display Products with Multiple Suppliers & Areas (Keep Comparison Feature)
+// ✅ Display Products with Multiple Suppliers Clearly (Sorted by Price)
 function displayProducts(products) {
     let productList = document.getElementById("productList");
     productList.innerHTML = "";
@@ -113,9 +113,9 @@ function displayProducts(products) {
             .sort((a, b) => a.price - b.price) // Sort by price (Lowest First)
             .map((product) =>
                 `<div class="supplier">
-                    <span class="product-supplier">Supplier: ${product.supplier} (${product.area})</span> |
-                    <span class="product-price">₹${product.price}</span> |
-                    <span class="product-update">Last Updated: ${product.lastUpdated}</span>
+                    <span class="product-supplier">🏪 ${product.supplier} (${product.area})</span> |
+                    <span class="product-price">💰 ₹${product.price}</span> |
+                    <span class="product-update">🕒 Last Updated: ${product.lastUpdated}</span>
                 </div>`
             )
             .join("");
@@ -124,7 +124,7 @@ function displayProducts(products) {
         productItem.classList.add("product");
         productItem.innerHTML = `
             <div class="product-title">
-                <h3>${productName}</h3>
+                <h3>📦 ${productName}</h3>
             </div>
             ${suppliersList}
         `;
