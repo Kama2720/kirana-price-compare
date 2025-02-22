@@ -1,22 +1,28 @@
-// Pre-set Admin Credentials (Change these later)
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "1234";
-
-window.onload = function () {
-    loadProducts(); // Load products from localStorage
+document.addEventListener("DOMContentLoaded", function () {
+    loadProducts(); // Load products when page loads
 
     document.getElementById("searchBox").addEventListener("keyup", searchProduct);
     document.getElementById("areaSelect").addEventListener("change", filterByArea);
     document.getElementById("updateForm").addEventListener("submit", addProduct);
 
-    // Admin Login
     document.getElementById("adminLogin").addEventListener("click", adminLogin);
     document.getElementById("adminLogout").addEventListener("click", adminLogout);
 
     checkAdminStatus();
-};
+});
 
-// **Check if Admin is Logged In**
+// Load Products from Local Storage
+function loadProducts() {
+    let storedProducts = localStorage.getItem("products");
+    if (storedProducts) {
+        productsData = JSON.parse(storedProducts);
+    } else {
+        productsData = [];
+    }
+    displayProducts(productsData);
+}
+
+// Check Admin Login Status
 function checkAdminStatus() {
     if (localStorage.getItem("isAdmin") === "true") {
         document.getElementById("updateSection").style.display = "block";
@@ -24,16 +30,17 @@ function checkAdminStatus() {
         document.getElementById("adminLogout").style.display = "inline-block";
     } else {
         document.getElementById("updateSection").style.display = "none";
+        document.getElementById("adminLogout").style.display = "none";
     }
 }
 
-// **Admin Login Function**
+// Admin Login Function
 function adminLogin() {
     let username = prompt("Enter Admin Username:");
     let password = prompt("Enter Admin Password:");
 
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-        alert("Admin Login Successful ✅");
+    if (username === "admin" && password === "1234") {
+        alert("✅ Admin Login Successful");
         localStorage.setItem("isAdmin", "true");
         checkAdminStatus();
     } else {
@@ -41,30 +48,57 @@ function adminLogin() {
     }
 }
 
-// **Admin Logout Function**
+// Admin Logout Function
 function adminLogout() {
     localStorage.removeItem("isAdmin");
     checkAdminStatus();
-    alert("Logged Out!");
+    alert("🚪 Logged Out Successfully!");
 }
 
-// **Load Products from Local Storage**
-let productsData = JSON.parse(localStorage.getItem("products")) || [
-    { "name": "Sugar (1kg)", "price": 40, "supplier": "ABC Wholesaler", "area": "Mumbai", "lastUpdated": "2025-02-21 10:00 AM" },
-    { "name": "Wheat Flour (5kg)", "price": 250, "supplier": "XYZ Traders", "area": "Delhi", "lastUpdated": "2025-02-21 09:30 AM" },
-    { "name": "Rice (1kg)", "price": 55, "supplier": "Good Quality Stores", "area": "Bangalore", "lastUpdated": "2025-02-20 06:00 PM" }
-];
+// ✅ Updated Function to Add/Update Product Prices
+function addProduct(event) {
+    event.preventDefault();
 
-function loadProducts() {
+    if (localStorage.getItem("isAdmin") !== "true") {
+        alert("❌ Only Admin Can Update Prices!");
+        return;
+    }
+
+    let name = document.getElementById("productName").value.trim();
+    let price = parseFloat(document.getElementById("productPrice").value);
+    let supplier = document.getElementById("supplierName").value.trim();
+    let area = document.getElementById("productCity").value.trim();
+    let lastUpdated = new Date().toLocaleString(); // Save Date & Time
+
+    if (!name || !price || !supplier || !area) {
+        alert("❌ Please fill all fields!");
+        return;
+    }
+
+    let existingProduct = productsData.find(
+        (p) => p.name.toLowerCase() === name.toLowerCase() && p.area.toLowerCase() === area.toLowerCase()
+    );
+
+    if (existingProduct) {
+        existingProduct.price = price;
+        existingProduct.supplier = supplier;
+        existingProduct.lastUpdated = lastUpdated;
+    } else {
+        productsData.push({ name, price, supplier, area, lastUpdated });
+    }
+
+    localStorage.setItem("products", JSON.stringify(productsData)); // Save to LocalStorage
     displayProducts(productsData);
+    document.getElementById("updateForm").reset();
+    alert("✅ Price Updated Successfully!");
 }
 
-// **Function to Display Products**
+// ✅ Updated Function to Display Products with "Last Updated" Info
 function displayProducts(products) {
     let productList = document.getElementById("productList");
     productList.innerHTML = "";
 
-    products.forEach((product, index) => {
+    products.forEach((product) => {
         let productItem = document.createElement("div");
         productItem.classList.add("product");
         productItem.innerHTML = `
@@ -77,57 +111,4 @@ function displayProducts(products) {
         `;
         productList.appendChild(productItem);
     });
-
-    localStorage.setItem("products", JSON.stringify(products));
-}
-
-// **Function to Add or Update a Product (Admin Only)**
-function addProduct(event) {
-    event.preventDefault();
-
-    if (localStorage.getItem("isAdmin") !== "true") {
-        alert("❌ Only Admin Can Update Prices!");
-        return;
-    }
-
-    let name = document.getElementById("productName").value;
-    let price = parseFloat(document.getElementById("productPrice").value);
-    let supplier = document.getElementById("supplierName").value;
-    let area = document.getElementById("productCity").value;
-    let lastUpdated = new Date().toLocaleString();
-
-    let existingProduct = productsData.find(p => p.name.toLowerCase() === name.toLowerCase() && p.area.toLowerCase() === area.toLowerCase());
-
-    if (existingProduct) {
-        existingProduct.price = price;
-        existingProduct.supplier = supplier;
-        existingProduct.lastUpdated = lastUpdated;
-    } else {
-        productsData.push({ name, price, supplier, area, lastUpdated });
-    }
-
-    displayProducts(productsData);
-    document.getElementById("updateForm").reset();
-}
-
-// **Function to Search Products by Name & Selected Area**
-function searchProduct() {
-    let searchValue = document.getElementById("searchBox").value.toLowerCase();
-    let selectedArea = document.getElementById("areaSelect").value;
-
-    let filteredProducts = productsData.filter(product =>
-        product.name.toLowerCase().includes(searchValue) &&
-        (selectedArea === "all" || product.area === selectedArea)
-    );
-
-    displayProducts(filteredProducts);
-}
-
-// **Function to Filter Products by Area**
-function filterByArea() {
-    let selectedArea = document.getElementById("areaSelect").value;
-    let filteredProducts = selectedArea === "all"
-        ? productsData
-        : productsData.filter(product => product.area === selectedArea);
-    displayProducts(filteredProducts);
 }
