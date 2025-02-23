@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🔑 Admin Panel</h1>
+        <a href="index.html" class="back-btn">⬅ Back to Home</a>
+    </header>
+
+    <div class="container" id="login-section">
+        <h2>Admin Login</h2>
+        <input type="email" id="admin-email" placeholder="Email">
+        <input type="password" id="admin-password" placeholder="Password">
+        <button onclick="adminLogin()">Login</button>
+    </div>
+
+    <div class="container" id="admin-section" style="display: none;">
+        <h2>Update Product Price</h2>
+        <input type="text" id="product-name" placeholder="Product Name">
+        <input type="number" id="new-price" placeholder="New Price">
+        <input type="text" id="supplier-name" placeholder="Supplier Name">
+        <input type="text" id="area-name" placeholder="Area">
+        <button onclick="updatePrice()">Update Price</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="firebaseConfig.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
