@@ -4,43 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kirana Price Comparison</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth.js"></script>
+    <script defer src="script.js"></script>
 </head>
 <body>
-    <h1>Kirana Price Comparison</h1>
+    <div class="container">
+        <h1>🔍 Kirana Price Comparison</h1>
 
-    <!-- ✅ Admin Login Section -->
-    <div id="adminLogin">
-        <h3>Admin Login</h3>
-        <input type="email" id="adminEmail" placeholder="Enter Admin Email">
-        <input type="password" id="adminPassword" placeholder="Enter Password">
-        <button onclick="adminLogin()">Login</button>
-        <button onclick="adminLogout()">Logout</button>
-        <p id="adminStatus">Not logged in</p>
+        <label for="area-select">Select Area:</label>
+        <select id="area-select">
+            <option value="all">All Areas</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Delhi">Delhi</option>
+        </select>
+
+        <input type="text" id="search-box" placeholder="Search for a product..." onkeyup="searchProduct()">
+        <div id="product-list"></div>
+
+        <button id="admin-btn" onclick="toggleAdminPanel()">🔑 Admin</button>
+
+        <div id="admin-panel" style="display: none;">
+            <h2>Admin Login</h2>
+            <input type="password" id="admin-password" placeholder="Enter Admin Password">
+            <button onclick="checkAdminLogin()">Login</button>
+
+            <div id="admin-section" style="display: none;">
+                <h3>Update Product Prices</h3>
+                <input type="text" id="product-name" placeholder="Product Name">
+                <input type="number" id="new-price" placeholder="New Price">
+                <input type="text" id="supplier-name" placeholder="Supplier Name">
+                <input type="text" id="area-name" placeholder="Area">
+                <button onclick="updatePrice()">Update Price</button>
+            </div>
+        </div>
     </div>
-
-    <!-- ✅ Select Area Dropdown -->
-    <label for="areaSelect">Select Area:</label>
-    <select id="areaSelect">
-        <option value="all">All Areas</option>
-        <option value="Mumbai">Mumbai</option>
-        <option value="Delhi">Delhi</option>
-        <option value="Bangalore">Bangalore</option>
-        <option value="Chennai">Chennai</option>
-    </select>
-
-    <!-- ✅ Product Search Input -->
-    <input type="text" id="searchInput" placeholder="Search product...">
-    <button onclick="searchProduct()">Search</button>
-
-    <!-- ✅ Display Search Results -->
-    <div id="results"></div>
-
-    <!-- ✅ Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-
-    <script src="script.js"></script>
 </body>
 </html>
