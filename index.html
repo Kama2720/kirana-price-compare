@@ -6,47 +6,41 @@
     <title>Kirana Price Comparison</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body id="body">
+<body>
+    <h1>Kirana Price Comparison</h1>
 
-    <div class="container">
-        <h1>Kirana Price Comparison</h1>
-
-        <!-- Area Selection -->
-        <label for="areaSelect">Choose Your Area:</label>
-        <select id="areaSelect" onchange="filterByArea()">
-            <option value="all">All Areas</option>
-            <option value="Mumbai">Mumbai</option>
-            <option value="Delhi">Delhi</option>
-            <option value="Delhi">khokra</option>
-            <option value="Bangalore">Bangalore</option>
-        </select>
-
-        <!-- Search Bar with Auto-Suggest -->
-        <input type="text" id="searchBox" placeholder="Search for a product..." onkeyup="searchProduct()" autocomplete="off">
-        <div id="suggestions"></div>
-
-        <!-- Product List -->
-        <div id="productList">
-            <!-- Products will be dynamically loaded here -->
-        </div>
+    <!-- ✅ Admin Login Section -->
+    <div id="adminLogin">
+        <h3>Admin Login</h3>
+        <input type="email" id="adminEmail" placeholder="Enter Admin Email">
+        <input type="password" id="adminPassword" placeholder="Enter Password">
+        <button onclick="adminLogin()">Login</button>
+        <button onclick="adminLogout()">Logout</button>
+        <p id="adminStatus">Not logged in</p>
     </div>
 
+    <!-- ✅ Select Area Dropdown -->
+    <label for="areaSelect">Select Area:</label>
+    <select id="areaSelect">
+        <option value="all">All Areas</option>
+        <option value="Mumbai">Mumbai</option>
+        <option value="Delhi">Delhi</option>
+        <option value="Bangalore">Bangalore</option>
+        <option value="Chennai">Chennai</option>
+    </select>
 
-<button id="adminLogin">🔑 Admin Login</button>
-<button id="adminLogout" style="display: none;">🚪 Logout</button>
+    <!-- ✅ Product Search Input -->
+    <input type="text" id="searchInput" placeholder="Search product...">
+    <button onclick="searchProduct()">Search</button>
 
-<div id="updateSection" style="display: none;">
-    <h3>Update Product Rates</h3>
-    <form id="updateForm">
-        <input type="text" id="productName" placeholder="Product Name" required>
-        <input type="number" id="productPrice" placeholder="Price (₹)" required>
-        <input type="text" id="supplierName" placeholder="Supplier Name" required>
-        <input type="text" id="productCity" placeholder="City" required>
-        <button type="submit">Update Rate</button>
-    </form>
-</div>
-<!-- Your page content here -->
+    <!-- ✅ Display Search Results -->
+    <div id="results"></div>
 
-<script src="script.js"></script> <!-- Make sure this is at the bottom -->
+    <!-- ✅ Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
+    <script src="script.js"></script>
 </body>
 </html>
