@@ -1,51 +1,54 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background: #f4f4f4;
+    background-color: #f4f4f4;
 }
 
-h1 {
-    color: #333;
+.container {
+    width: 50%;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
-select, input, button {
-    margin: 10px;
+input, select, button {
     padding: 10px;
-    font-size: 16px;
+    margin: 10px;
+    width: 80%;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
 button {
-    background: #007BFF;
+    background-color: #28a745;
     color: white;
-    border: none;
     cursor: pointer;
 }
 
-button:hover {
-    background: #0056b3;
-}
-
-.product-card {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin: 10px;
+#admin-panel {
+    background-color: #f8d7da;
+    padding: 15px;
     border-radius: 5px;
-    background: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: none;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+#product-list {
+    margin-top: 20px;
 }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
+.product-item {
+    padding: 10px;
+    background: #e3f2fd;
+    margin: 5px;
+    border-radius: 5px;
 }
 
-th {
-    background: #90EE90; /* Light Green */
+.match-found {
+    background-color: lightgreen !important;
+}
+
+.no-match {
+    background-color: lightcoral !important;
 }
