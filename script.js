@@ -1,159 +1,151 @@
-document.addEventListener("DOMContentLoaded", function () {
-    loadProducts();
-    document.getElementById("searchBox").addEventListener("keyup", searchProduct);
-    document.getElementById("areaSelect").addEventListener("change", filterByArea);
-    document.getElementById("updateForm").addEventListener("submit", addOrUpdateProduct);
+// ✅ Firebase Configuration
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
 
-    document.getElementById("adminLogin").addEventListener("click", adminLogin);
-    document.getElementById("adminLogout").addEventListener("click", adminLogout);
+// ✅ Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
 
-    checkAdminStatus();
-});
-
-// ✅ Load Products from Local Storage
-function loadProducts() {
-    let storedProducts = localStorage.getItem("products");
-    productsData = storedProducts ? JSON.parse(storedProducts) : [];
-    displayProducts(productsData);
-}
-
-// ✅ Check Admin Login Status
-function checkAdminStatus() {
-    if (localStorage.getItem("isAdmin") === "true") {
-        document.getElementById("updateSection").style.display = "block";
-        document.getElementById("adminLogin").style.display = "none";
-        document.getElementById("adminLogout").style.display = "inline-block";
-    } else {
-        document.getElementById("updateSection").style.display = "none";
-        document.getElementById("adminLogout").style.display = "none";
-    }
-}
+let isAdmin = false; // Track admin login state
 
 // ✅ Admin Login Function
 function adminLogin() {
-    let username = prompt("Enter Admin Username:");
-    let password = prompt("Enter Admin Password:");
+    let email = document.getElementById("adminEmail").value;
+    let password = document.getElementById("adminPassword").value;
 
-    if (username === "admin" && password === "1234") {
-        alert("✅ Admin Login Successful");
-        localStorage.setItem("isAdmin", "true");
-        checkAdminStatus();
-    } else {
-        alert("❌ Incorrect Credentials!");
-    }
+    auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            isAdmin = true;
+            document.getElementById("adminStatus").innerText = "✅ Logged in as Admin";
+            alert("✅ Admin Logged In Successfully!");
+            searchProduct();
+        })
+        .catch((error) => {
+            alert("❌ Login Failed: " + error.message);
+        });
 }
 
 // ✅ Admin Logout Function
 function adminLogout() {
-    localStorage.removeItem("isAdmin");
-    checkAdminStatus();
-    alert("🚪 Logged Out Successfully!");
+    auth.signOut().then(() => {
+        isAdmin = false;
+        document.getElementById("adminStatus").innerText = "Not logged in";
+        alert("✅ Admin Logged Out!");
+        searchProduct();
+    });
 }
 
-// ✅ Add or Update Price for a Specific Supplier & Product
-function addOrUpdateProduct(event) {
-    event.preventDefault();
+// ✅ Search Product & Filter by Area
+function searchProduct() {
+    let searchQuery = document.getElementById("searchInput").value.trim().toLowerCase();
+    let selectedArea = document.getElementById("areaSelect").value;
+    let results = [];
 
-    if (localStorage.getItem("isAdmin") !== "true") {
-        alert("❌ Only Admin Can Update Prices!");
+    if (!searchQuery) {
+        alert("❌ Please enter a product name!");
         return;
     }
 
-    let name = document.getElementById("productName").value.trim();
-    let price = parseFloat(document.getElementById("productPrice").value);
-    let supplier = document.getElementById("supplierName").value.trim();
-    let area = document.getElementById("productCity").value.trim();
-    let lastUpdated = new Date().toLocaleString(); // Save Date & Time
+    db.collection("products").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            let product = doc.data();
 
-    if (!name || !price || !supplier || !area) {
-        alert("❌ Please fill all fields!");
-        return;
-    }
+            if (product.name.toLowerCase().includes(searchQuery)) {
+                if (selectedArea === "all" || product.area === selectedArea) {
+                    results.push({ id: doc.id, ...product });
+                }
+            }
+        });
 
-    // ✅ Check if the same supplier is already selling this product in the same area
-    let existingProductIndex = productsData.findIndex(
-        (p) => p.name.toLowerCase() === name.toLowerCase() &&
-               p.supplier.toLowerCase() === supplier.toLowerCase() &&
-               p.area.toLowerCase() === area.toLowerCase()
-    );
-
-    if (existingProductIndex !== -1) {
-        // ✅ Update this supplier's price without affecting other suppliers
-        productsData[existingProductIndex].price = price;
-        productsData[existingProductIndex].lastUpdated = lastUpdated;
-    } else {
-        // ✅ Add a new entry if the supplier is new
-        productsData.push({ name, price, supplier, area, lastUpdated });
-    }
-
-    localStorage.setItem("products", JSON.stringify(productsData)); // Save to LocalStorage
-    displayProducts(productsData);
-    document.getElementById("updateForm").reset();
-    alert("✅ Price Updated Successfully!");
+        displayProducts(results);
+    });
 }
 
-// ✅ Display Products with Multiple Suppliers Clearly (Sorted by Price)
+// ✅ Display Products & Allow Admin to Update Prices
 function displayProducts(products) {
-    let productList = document.getElementById("productList");
-    productList.innerHTML = "";
+    let resultsContainer = document.getElementById("results");
+    resultsContainer.innerHTML = "";
 
-    let groupedProducts = {};
+    if (products.length === 0) {
+        resultsContainer.innerHTML = "<p>❌ No results found!</p>";
+        return;
+    }
 
-    // Group products by name
+    let productMap = {};
+
     products.forEach((product) => {
-        let productKey = product.name.toLowerCase();
-        if (!groupedProducts[productKey]) {
-            groupedProducts[productKey] = [];
+        let key = `${product.name}-${product.area}`;
+
+        if (!productMap[key]) {
+            productMap[key] = {
+                name: product.name,
+                area: product.area,
+                suppliers: []
+            };
         }
-        groupedProducts[productKey].push(product);
+
+        productMap[key].suppliers.push({
+            id: product.id,
+            supplier: product.supplier,
+            price: product.price,
+            lastUpdated: product.lastUpdated
+        });
     });
 
-    for (let productName in groupedProducts) {
-        let suppliersList = groupedProducts[productName]
-            .sort((a, b) => a.price - b.price) // Sort by price (Lowest First)
-            .map((product) =>
-                `<div class="supplier">
-                    <span class="product-supplier">🏪 ${product.supplier} (${product.area})</span> |
-                    <span class="product-price">💰 ₹${product.price}</span> |
-                    <span class="product-update">🕒 Last Updated: ${product.lastUpdated}</span>
-                </div>`
-            )
-            .join("");
+    // ✅ Display Grouped Products
+    for (let key in productMap) {
+        let productData = productMap[key];
 
-        let productItem = document.createElement("div");
-        productItem.classList.add("product");
-        productItem.innerHTML = `
-            <div class="product-title">
-                <h3>📦 ${productName}</h3>
-            </div>
-            ${suppliersList}
-        `;
-        productList.appendChild(productItem);
+        let productHTML = `
+            <div class="product-card">
+                <h3>${productData.name} - ${productData.area}</h3>
+                <table>
+                    <tr>
+                        <th>Supplier</th>
+                        <th>Price</th>
+                        <th>Last Updated</th>
+                        ${isAdmin ? "<th>Update Price</th>" : ""}
+                    </tr>`;
+
+        productData.suppliers.forEach((supplier) => {
+            productHTML += `
+                <tr>
+                    <td>${supplier.supplier}</td>
+                    <td>₹${supplier.price}</td>
+                    <td>${supplier.lastUpdated}</td>
+                    ${isAdmin ? `
+                        <td>
+                            <input type="number" id="price-${supplier.id}" value="${supplier.price}">
+                            <button onclick="updatePrice('${supplier.id}')">Update</button>
+                        </td>
+                    ` : ""}
+                </tr>`;
+        });
+
+        productHTML += `</table></div>`;
+        resultsContainer.innerHTML += productHTML;
     }
 }
 
-// ✅ Search Product and Change Background Color
-function searchProduct() {
-    let searchValue = document.getElementById("searchBox").value.toLowerCase();
-    let filteredProducts = productsData.filter((product) => product.name.toLowerCase().includes(searchValue));
+// ✅ Admin Updates Price in Firestore
+function updatePrice(productId) {
+    let newPrice = document.getElementById(`price-${productId}`).value;
+    let timestamp = new Date().toLocaleString();
 
-    if (searchValue === "") {
-        document.body.style.backgroundColor = "#ADD8E6"; // Default ocean light blue
-    } else if (filteredProducts.length > 0) {
-        document.body.style.backgroundColor = "#90EE90"; // Light green for match found
-    } else {
-        document.body.style.backgroundColor = "#FF7F7F"; // Light red for no match
-    }
-
-    displayProducts(filteredProducts);
-}
-
-// ✅ Filter Products by Selected Area
-function filterByArea() {
-    let selectedArea = document.getElementById("areaSelect").value.toLowerCase();
-    let filteredProducts = selectedArea === "all"
-        ? productsData
-        : productsData.filter((product) => product.area.toLowerCase() === selectedArea);
-
-    displayProducts(filteredProducts);
+    db.collection("products").doc(productId).update({
+        price: newPrice,
+        lastUpdated: timestamp
+    }).then(() => {
+        alert("✅ Price updated successfully!");
+        searchProduct();
+    }).catch((error) => {
+        console.error("❌ Error updating price: ", error);
+    });
 }
