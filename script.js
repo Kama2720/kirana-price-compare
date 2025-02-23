@@ -11,141 +11,97 @@ const firebaseConfig = {
 // ✅ Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const auth = firebase.auth();
 
-let isAdmin = false; // Track admin login state
-
-// ✅ Admin Login Function
-function adminLogin() {
-    let email = document.getElementById("adminEmail").value;
-    let password = document.getElementById("adminPassword").value;
-
-    auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            isAdmin = true;
-            document.getElementById("adminStatus").innerText = "✅ Logged in as Admin";
-            alert("✅ Admin Logged In Successfully!");
-            searchProduct();
-        })
-        .catch((error) => {
-            alert("❌ Login Failed: " + error.message);
-        });
-}
-
-// ✅ Admin Logout Function
-function adminLogout() {
-    auth.signOut().then(() => {
-        isAdmin = false;
-        document.getElementById("adminStatus").innerText = "Not logged in";
-        alert("✅ Admin Logged Out!");
-        searchProduct();
-    });
-}
-
-// ✅ Search Product & Filter by Area
+// ✅ Search Function
 function searchProduct() {
-    let searchQuery = document.getElementById("searchInput").value.trim().toLowerCase();
-    let selectedArea = document.getElementById("areaSelect").value;
-    let results = [];
+    let searchQuery = document.getElementById("search-box").value.toLowerCase();
+    let selectedArea = document.getElementById("area-select").value;
 
-    if (!searchQuery) {
-        alert("❌ Please enter a product name!");
-        return;
-    }
-
-    db.collection("products").get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
+    db.collection("products").get().then(snapshot => {
+        let results = [];
+        snapshot.docs.forEach(doc => {
             let product = doc.data();
-
             if (product.name.toLowerCase().includes(searchQuery)) {
                 if (selectedArea === "all" || product.area === selectedArea) {
-                    results.push({ id: doc.id, ...product });
+                    results.push(product);
                 }
             }
         });
 
         displayProducts(results);
+        changeBackgroundColor(results.length);
     });
 }
 
-// ✅ Display Products & Allow Admin to Update Prices
+// ✅ Display Search Results
 function displayProducts(products) {
-    let resultsContainer = document.getElementById("results");
-    resultsContainer.innerHTML = "";
+    let productList = document.getElementById("product-list");
+    productList.innerHTML = "";
 
     if (products.length === 0) {
-        resultsContainer.innerHTML = "<p>❌ No results found!</p>";
+        productList.innerHTML = "<p>No products found.</p>";
         return;
     }
 
-    let productMap = {};
-
-    products.forEach((product) => {
-        let key = `${product.name}-${product.area}`;
-
-        if (!productMap[key]) {
-            productMap[key] = {
-                name: product.name,
-                area: product.area,
-                suppliers: []
-            };
-        }
-
-        productMap[key].suppliers.push({
-            id: product.id,
-            supplier: product.supplier,
-            price: product.price,
-            lastUpdated: product.lastUpdated
-        });
+    products.forEach(product => {
+        productList.innerHTML += `
+            <div class="product-item">
+                <p><strong>${product.name}</strong> - ₹${product.price}</p>
+                <p>Supplier: ${product.supplier} | Area: ${product.area}</p>
+                <p><small>Last Updated: ${product.lastUpdated}</small></p>
+            </div>
+        `;
     });
+}
 
-    // ✅ Display Grouped Products
-    for (let key in productMap) {
-        let productData = productMap[key];
-
-        let productHTML = `
-            <div class="product-card">
-                <h3>${productData.name} - ${productData.area}</h3>
-                <table>
-                    <tr>
-                        <th>Supplier</th>
-                        <th>Price</th>
-                        <th>Last Updated</th>
-                        ${isAdmin ? "<th>Update Price</th>" : ""}
-                    </tr>`;
-
-        productData.suppliers.forEach((supplier) => {
-            productHTML += `
-                <tr>
-                    <td>${supplier.supplier}</td>
-                    <td>₹${supplier.price}</td>
-                    <td>${supplier.lastUpdated}</td>
-                    ${isAdmin ? `
-                        <td>
-                            <input type="number" id="price-${supplier.id}" value="${supplier.price}">
-                            <button onclick="updatePrice('${supplier.id}')">Update</button>
-                        </td>
-                    ` : ""}
-                </tr>`;
-        });
-
-        productHTML += `</table></div>`;
-        resultsContainer.innerHTML += productHTML;
+// ✅ Change Background Color Based on Search Result
+function changeBackgroundColor(resultCount) {
+    if (resultCount > 0) {
+        document.body.style.backgroundColor = "lightgreen"; // Match found
+    } else {
+        document.body.style.backgroundColor = "lightcoral"; // No match
     }
 }
 
-// ✅ Admin Updates Price in Firestore
-function updatePrice(productId) {
-    let newPrice = document.getElementById(`price-${productId}`).value;
-    let timestamp = new Date().toLocaleString();
+// ✅ Toggle Admin Panel
+function toggleAdminPanel() {
+    document.getElementById("admin-panel").style.display = "block";
+}
 
-    db.collection("products").doc(productId).update({
-        price: newPrice,
-        lastUpdated: timestamp
+// ✅ Admin Login
+function checkAdminLogin() {
+    const enteredPassword = document.getElementById("admin-password").value;
+
+    db.collection("settings").doc("admin").get().then((doc) => {
+        if (doc.exists && enteredPassword === doc.data().adminPassword) {
+            document.getElementById("admin-section").style.display = "block";
+            alert("Admin login successful!");
+        } else {
+            alert("Incorrect password!");
+        }
+    }).catch(error => {
+        console.error("Error fetching admin password:", error);
+        alert("Error verifying password.");
+    });
+}
+
+// ✅ Update Product Price
+function updatePrice() {
+    let productName = document.getElementById("product-name").value;
+    let newPrice = document.getElementById("new-price").value;
+    let supplierName = document.getElementById("supplier-name").value;
+    let areaName = document.getElementById("area-name").value;
+
+    db.collection("products").add({
+        name: productName,
+        price: parseFloat(newPrice),
+        supplier: supplierName,
+        area: areaName,
+        lastUpdated: new Date().toLocaleString()
     }).then(() => {
-        alert("✅ Price updated successfully!");
-        searchProduct();
-    }).catch((error) => {
-        console.error("❌ Error updating price: ", error);
+        alert("Price updated successfully!");
+        searchProduct(); // Refresh search
+    }).catch(error => {
+        console.error("Error updating price:", error);
     });
 }
