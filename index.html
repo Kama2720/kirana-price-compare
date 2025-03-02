@@ -1,45 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kirana Price Comparison</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="firebaseConfig.js"></script>
 </head>
 <body>
-    <header>
-        <h1>🛒 Kirana Price Comparison</h1>
-        <a href="admin.html" class="admin-btn">Admin Panel</a>
-    </header>
-
     <div class="container">
-        <select id="area-select">
-            <option value="all">All Areas</option>
-            <option value="Delhi">Delhi</option>
-            <option value="Mumbai">Mumbai</option>
-            <option value="Bangalore">Bangalore</option>
-        </select>
-        <input type="text" id="search-box" placeholder="Search Product...">
-        <button onclick="searchProduct()">🔍 Search</button>
-
-        <table>
+        <h1>Kirana Price Compare</h1>
+        <input type="text" id="searchInput" placeholder="Search product..." onkeyup="filterProducts()">
+        
+        <table id="productTable">
             <thead>
                 <tr>
                     <th>Product</th>
                     <th>Price</th>
                     <th>Supplier</th>
-                    <th>Area</th>
+                    <th>Location</th>
                     <th>Last Updated</th>
                 </tr>
             </thead>
-            <tbody id="product-list"></tbody>
+            <tbody id="tableBody"></tbody>
         </table>
+        
+        <!-- Admin Login & Update Panel -->
+        <button id="adminBtn" onclick="toggleAdminPanel()">Admin Panel</button>
+        
+        <div id="adminPanel" class="hidden">
+            <h2>Admin Login</h2>
+            <input type="email" id="adminEmail" placeholder="Admin Email">
+            <input type="password" id="adminPassword" placeholder="Password">
+            <button onclick="adminLogin()">Login</button>
+
+            <div id="updateSection" class="hidden">
+                <h2>Update Price</h2>
+                <input type="text" id="updateProduct" placeholder="Product Name">
+                <input type="number" id="updatePrice" placeholder="New Price">
+                <button onclick="updatePrice()">Update Price</button>
+            </div>
+            <button onclick="adminLogout()">Logout</button>
+        </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-    <script src="firebaseConfig.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
